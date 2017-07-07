@@ -3379,10 +3379,6 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         pfrom->PushMessage("verack");
         pfrom->ssSend.SetVersion(min(pfrom->nVersion, PROTOCOL_VERSION));
 
-        // Jumpstart header sync
-        if (pfrom->fNetworkNode)
-            pfrom->PushMessage("getheaders", chainActive.GetLocator(pindexBestHeader), uint256());
-
 	//printf("inbound %d\n", pfrom->fInbound);
         if (!pfrom->fInbound)
         {
@@ -4178,10 +4174,11 @@ bool ProcessMessages(CNode* pfrom)
         unsigned int nMessageSize = hdr.nMessageSize;
 
         // Checksum
-        //CDataStream& vRecv = msg.vRecv;
-        //uint256 hash = Hash(vRecv.begin(), vRecv.begin() + nMessageSize);
-        //unsigned int nChecksum = 0;
-        //memcpy(&nChecksum, &hash, sizeof(nChecksum));
+        CDataStream& vRecv = msg.vRecv;
+        uint256 hash = Hash(vRecv.begin(), vRecv.begin() + nMessageSize);
+        unsigned int nChecksum = 0;
+        memcpy(&nChecksum, &hash, sizeof(nChecksum));
+
         //if (nChecksum != hdr.nChecksum)
         //{
         //   LogPrintf("ProcessMessages(%s, %u bytes) : CHECKSUM ERROR nChecksum=%08x hdr.nChecksum=%08x\n",
