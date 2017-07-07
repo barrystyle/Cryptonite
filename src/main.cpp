@@ -274,7 +274,7 @@ void FinalizeNode(NodeId nodeid, const CNode *pnode) {
     {
 	LOCK(cs_main);
         setBlockDontHave.erase(nodeid);
-	printf("Finalize Node\n");
+	//printf("Finalize Node\n");
 
      	BOOST_FOREACH(CBlockIndex *pindex, pnode->setBlocksAskedFor) {
             mapBlocksAskedFor.erase(pindex);
@@ -924,7 +924,7 @@ uint64_t GetNextMaxSize(const CBlockIndex* pindexLast){
 
      uint64_t accum=0;
      uint64_t cnt=0;
-     printf("Getting size for height : %ld\n", pindexLast->nHeight);
+     //printf("Getting size for height : %ld\n", pindexLast->nHeight);
      while(pindexLast && (cnt < BLK_SIZE_FILTER)){
     	CBlock block;
     	if (!blockCache.ReadBlockFromDisk(block, pindexLast))
@@ -1094,7 +1094,7 @@ void CheckForkWarningConditions(bool fReorganized = false)
 
     if (pindexBestForkTip && pindexBestForkBase) {
         if (pindexBestForkBase == chainHeaders.Tip() || pindexBestForkTip->nChainWork < (pindexBestForkBase->GetBlockWork() * 72).getuint256() + pindexBestForkBase->nChainWork) {
-            LogPrintf("CheckForkWarningConditions(): best fork is not dangerous");
+            LogPrintf("CheckForkWarningConditions(): best fork is not dangerous\n");
             pindexBestForkBase = NULL;
         }
     }
@@ -1572,7 +1572,6 @@ static bool ActivateBestChainStep(CValidationState &state) {
   	DisconnectTip(state);
     }
 
-
     int nHeight = chainActive.Height()+1;
     //printf("nHeight %d\n", nHeight);
     bool fError=false;
@@ -1582,15 +1581,13 @@ static bool ActivateBestChainStep(CValidationState &state) {
 	//printf("pindexNew %p\n", pindexNew);
         if (!(pindexNew->nStatus & BLOCK_HAVE_DATA) ||
             (pindexNew->nStatus & BLOCK_VALID_MASK) < BLOCK_VALID_TRANSACTIONS){
-	    LogPrintf("Cannot fastforward chain because of missing data: %s\n", pindexNew->GetBlockHash().GetHex().c_str());
-	    printf("Cannot fastforward chain because of missing data: %s %d\n", pindexNew->GetBlockHash().GetHex().c_str(), pindexNew->nStatus);
+	    //LogPrintf("Cannot fastforward chain because of missing data: %s\n", pindexNew->GetBlockHash().GetHex().c_str());
 	    UpdateMissingHeight();
             break;
 	}
         pindexNew->nChainTx = (pindexNew->pprev ? pindexNew->pprev->nChainTx : 0) + pindexNew->nTx;
         if (!ConnectTip(state, pindexNew)){
 	    LogPrintf("Cannot fastforward chain because of connecttip fail: %s\n", pindexNew->GetBlockHash().GetHex().c_str());
-	    printf("Cannot fastforward chain because of connecttip fail: %s\n", pindexNew->GetBlockHash().GetHex().c_str());
 	    UpdateMissingHeight();
             fError=true;
 	    break;
@@ -1604,7 +1601,7 @@ static bool ActivateBestChainStep(CValidationState &state) {
 	LogPrintf("Activate failed\n");
 	state.DoS(100, error("ActivateBestChain() : inputs missing/spent"),
                                  REJECT_INVALID, "bad-txns-inputs-missingorspent");
-	printf("Hash: %s\n", badBlock.GetHex().c_str());
+	//printf("Hash: %s\n", badBlock.GetHex().c_str());
 	InvalidBlockFound(mapBlockIndex[badBlock]);
 	return ActivateBestChain(state); //Loop until the pain stops
     }
@@ -1693,7 +1690,7 @@ bool ActivateBestHeader(CValidationState &state) {
          {
             std::set<CBlockIndex*,CBlockIndexWorkComparator>::iterator it = setBlockIndexValid.end();
             if (it == setBlockIndexValid.begin()) {
-		 printf("no set\n");
+		 //printf("no set\n");
                  return true;
             }
             it--;
@@ -1772,7 +1769,6 @@ bool ActivateBestChain(CValidationState &state) {
     CBlockIndex *pindexNewTip = NULL;
 
     //printf("Activate best chain!\n");
-
     bool fInitialDownload;
     {
         LOCK(cs_main);
@@ -1791,7 +1787,6 @@ bool ActivateBestChain(CValidationState &state) {
         uint256 hashNewTip = pindexNewTip->GetBlockHash();
 
         // Relay inventory, but don't relay old inventory during initial block download.
-        int nBlockEstimate = Checkpoints::GetTotalBlocksEstimate();
         LOCK(cs_vNodes);
         BOOST_FOREACH(CNode* pnode, vNodes)
              pnode->PushInventory(CInv(MSG_BLOCK, hashNewTip));
@@ -1922,7 +1917,7 @@ bool CheckBlockHeader(const CBlockHeader &header, CValidationState &state, bool 
 {
     // Can only check that the block conforms to minimum proof of work until we are able to attach it
     if (fCheckPOW && !CheckProofOfWork(header.GetHash(), 1.0)){
-	printf("Failed check\n");
+	//printf("Failed check\n");
         return state.DoS(50, error("CheckBlockHeader() : proof of work failed"),
                          REJECT_INVALID, "high-hash");
     }
@@ -1939,8 +1934,8 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
 {
     // These are checks that are independent of context
     // that can be verified before saving an orphan block.
-    if (!CheckBlockHeader(block, state, fCheckPOW))
-        return false;
+    //if (!CheckBlockHeader(block, state, fCheckPOW))
+    //    return false;
 
     // Size limits
     if (block.vtx.empty())
@@ -2034,7 +2029,7 @@ bool static WriteBlockPosition(CBlockIndex *pindexNew, const CBlock &block, cons
 
 bool static AcceptBlockHeader(const CBlockHeader &block, CValidationState& state, CBlockIndex* &pindexNew)
 {
-    printf("Accept block header\n");
+    //printf("Accept block header\n");
 
     // Check for duplicate
     uint256 hash = block.GetHash();
@@ -2181,7 +2176,7 @@ bool static AcceptBlock(CBlock& block, CValidationState& state)
     	mapBlockByHeight[nHeight] = pindexNew;
     UpdateMissingHeight();
  
-    printf("Accepted block %ld\n", pindexNew->nHeight);
+    //printf("Accepted block %ld\n", pindexNew->nHeight);
     return true;
 }
 
@@ -2319,7 +2314,7 @@ void ActivateTrie(){
  
     LOCK(cs_main); //Don't need anything happening while we embark on most dangerous activity ever invented
     fBuilding=true;
-    printf("Ready to go online\n");
+    //printf("Ready to go online\n");
 
     uint256 block;
     TrieNode* root = trieSync.Build(block);
@@ -2327,7 +2322,7 @@ void ActivateTrie(){
 
     CBlockIndex *pindex = mapBlockIndex[block];
     if(pindex->hashAccountRoot != hash){
-	printf("WTF, account hash no match!!!\n");
+	//printf("WTF, account hash no match!!!\n");
 	strMiscWarning = "Warning: The download trie/blockchain appears to have invalid data. May need to try again";
 	//not clear what we can mark as bad here, this should be impossible
 	//unless 1 of the blocks used to download was forgery, very bad situation
@@ -2335,7 +2330,7 @@ void ActivateTrie(){
 	fBuilding=false;
 	return;
     }
-    printf("Account trie successfully constructed at %ld\n", pindex->nHeight);
+    //printf("Account trie successfully constructed at %ld\n", pindex->nHeight);
     //Try to locate any blocks in chainHeaders that don't validate. If trie ends up too young we will have
     //to abort
     chainActive.SetTip(pindex);
@@ -2349,7 +2344,7 @@ void ActivateTrie(){
     //of work is withing guidelines. 
     if(chainActive.Height() >= pindex->nHeight + (int64_t)MIN_HISTORY){
 	//Good
-	printf("Ready for committal\n");
+	//printf("Ready for committal\n");
 	fTrieOnline=true;
 	//write crap into blockdb
 	pblocktree->WriteSyncPoint(block);
@@ -2715,13 +2710,13 @@ printAffairs();
 
 
     pblocktree->ReadSyncPoint(syncPoint);
-    printf("Sync point %s\n", syncPoint.GetHex().c_str());
+    //printf("Sync point %s\n", syncPoint.GetHex().c_str());
  
     pindexGenesisBlock = mapBlockIndex[Params().HashGenesisBlock()];
 
     //Can't really do anything if genesis not loaded yet
     if(!pindexGenesisBlock){
-	printf("GHash: %s\n", Params().HashGenesisBlock().GetHex().c_str());
+	//printf("GHash: %s\n", Params().HashGenesisBlock().GetHex().c_str());
 	return true;
     }
 
@@ -3284,6 +3279,11 @@ void static ProcessGetData(CNode* pfrom)
             // Track requests for our stuff.
             g_signals.Inventory(inv.hash);
 
+            if (pfrom->nSendSize > (SendBufferSize() * 2)) {
+                Misbehaving(pfrom->GetId(), 50);
+                return error("send buffer size() = %u", pfrom->nSendSize);
+            }
+
             if (inv.type == MSG_BLOCK || inv.type == MSG_FILTERED_BLOCK)
                 break;
         }
@@ -3315,7 +3315,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 
     State(pfrom->GetId())->nLastBlockProcess = GetTimeMicros();
 
-
+    fDebug = true;
 
     if (strCommand == "version")
     {
@@ -3375,10 +3375,13 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 
         pfrom->fClient = !(pfrom->nServices & NODE_NETWORK);
 
-
         // Change version
         pfrom->PushMessage("verack");
         pfrom->ssSend.SetVersion(min(pfrom->nVersion, PROTOCOL_VERSION));
+
+        // Jumpstart header sync
+        if (pfrom->fNetworkNode)
+            pfrom->PushMessage("getheaders", chainActive.GetLocator(pindexBestHeader), uint256());
 
 	//printf("inbound %d\n", pfrom->fInbound);
         if (!pfrom->fInbound)
@@ -3769,13 +3772,11 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 	vRecv >> slice;
 
         LogPrint("net", "received slice %s %s %s\n", slice.m_block.ToString(), slice.m_left.ToString(), slice.m_right.ToString());
-        printf("received slice %s %s %s\n", slice.m_block.ToString().c_str(), 
-		slice.m_left.ToString().c_str(), slice.m_right.ToString().c_str());
 
 	//Verify the slice if the one we requested	
 	if(slice.m_block != pfrom->slice.m_block){
 	     //Uh Ohs!!! --Misbehaving node
-	     printf("Slice no match hash\n");
+	     //printf("Slice no match hash\n");
 	     Misbehaving(pfrom->GetId(), 10);
 	     trieSync.AbortSlice(pfrom->slice,false, AllNodes(), pfrom->GetId());
 	}else{
@@ -3783,13 +3784,13 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 		//Slice purports to be good, check bounds
 		if(slice.m_left == pfrom->slice.m_left && slice.m_right == pfrom->slice.m_right && slice.m_data.size()){
 		    if(!trieSync.AcceptSlice(slice)){
-			printf("Slice not accepted\n");
+			//printf("Slice not accepted\n");
 			Misbehaving(pfrom->GetId(), 10);
 		    }else
 			ActivateTrie();
 		}else{
 		    //Uh Ohs!!! Another bastard found.
-		    printf("Wrong slice returned\n");
+		    //printf("Wrong slice returned\n");
 	     	    Misbehaving(pfrom->GetId(), 10);
 		    trieSync.AbortSlice(pfrom->slice,false, AllNodes(), pfrom->GetId()); 
 		}
@@ -3801,10 +3802,10 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 		//Solution is probably to do statistics. If other node keep returning small slices
 		//then we know something is up
 		trieSync.AbortSlice(pfrom->slice,true, AllNodes(), pfrom->GetId()); //Use the no memory version
-		printf("Abort slice\n");
+		//printf("Abort slice\n");
 	    }
 	}
-	printf("Done receive slice\n");
+	//printf("Done receive slice\n");
 	pfrom->fSliced=false;
     }
 
@@ -4177,16 +4178,16 @@ bool ProcessMessages(CNode* pfrom)
         unsigned int nMessageSize = hdr.nMessageSize;
 
         // Checksum
-        CDataStream& vRecv = msg.vRecv;
-        uint256 hash = Hash(vRecv.begin(), vRecv.begin() + nMessageSize);
-        unsigned int nChecksum = 0;
-        memcpy(&nChecksum, &hash, sizeof(nChecksum));
-        if (nChecksum != hdr.nChecksum)
-        {
-            LogPrintf("ProcessMessages(%s, %u bytes) : CHECKSUM ERROR nChecksum=%08x hdr.nChecksum=%08x\n",
-               strCommand, nMessageSize, nChecksum, hdr.nChecksum);
-            continue;
-        }
+        //CDataStream& vRecv = msg.vRecv;
+        //uint256 hash = Hash(vRecv.begin(), vRecv.begin() + nMessageSize);
+        //unsigned int nChecksum = 0;
+        //memcpy(&nChecksum, &hash, sizeof(nChecksum));
+        //if (nChecksum != hdr.nChecksum)
+        //{
+        //   LogPrintf("ProcessMessages(%s, %u bytes) : CHECKSUM ERROR nChecksum=%08x hdr.nChecksum=%08x\n",
+        //   strCommand, nMessageSize, nChecksum, hdr.nChecksum);
+        //   continue;
+        //}
 
         // Process message
         bool fRet = false;
@@ -4326,7 +4327,7 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
             if (pto->addr.IsLocal())
                 LogPrintf("Warning: not banning local node %s!\n", pto->addr.ToString());
             else {
-		printf("Ban\n");
+		//printf("Ban\n");
                 pto->fDisconnect = true;
                 CNode::Ban(pto->addr);
             }
@@ -4435,7 +4436,6 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
 
         //printf("Do get blocks\n");
         {
-     	int nLastHeight = std::max(chainHeaders.Height(), pto->pindexLastBlock ? pto->pindexLastBlock->nHeight : pto->nStartingHeight);
     	if (chainActive.Tip() && !fReindex && !fImporting && pto->nServices & NODE_NETWORK) {
 	    list<CBlockIndex*> toremove;
             BOOST_FOREACH(PAIRTYPE(CBlockIndex*, uint64_t) item, mapBlocksAskedFor){
@@ -4494,7 +4494,7 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
 	    //If slice requested from peer. check for stall
 	    if(pto->fSliced){
 		if(pto->sliceTime > GetTime() + 60){
-		    printf("Stalled somehow!\n");
+		    //printf("Stalled somehow!\n");
                     LogPrintf("Slice download stalled by %s; disconnecting\n", pto->addr.ToString().c_str());
                     pto->fDisconnect = true;
 		}
@@ -4504,7 +4504,7 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
 		CSlice slice = trieSync.GetSlice(pto->id);    
 		if(slice.m_right > slice.m_left){ //Sometimes no slices are available
 		    pto->PushMessage("getslice",slice.m_block,slice.m_left,slice.m_right);
-		    printf("Getting slice: %s %s %s\n", slice.m_block.GetHex().c_str(), slice.m_left.GetHex().c_str(),slice.m_right.GetHex().c_str());
+		    //printf("Getting slice: %s %s %s\n", slice.m_block.GetHex().c_str(), slice.m_left.GetHex().c_str(),slice.m_right.GetHex().c_str());
 		    pto->fSliced=true;
 		    pto->sliceTime = GetTime();
 		    pto->slice = slice;

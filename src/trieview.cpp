@@ -17,7 +17,7 @@ TrieView::TrieView(){
     m_root = 0;
 
     boost::filesystem::path pathDebug = GetDataDir() / "trie.dat";
-    printf("Opening %s\n", pathDebug.string().c_str());
+    //printf("Opening %s\n", pathDebug.string().c_str());
 
     FILE* filein = fopen(pathDebug.string().c_str(), "rb");
     if(!filein)
@@ -66,14 +66,14 @@ bool TrieView::Activate(CBlockIndex *pindex, uint256 &badBlock){
     getSet(pindex,newSet);
     getSet((*mapBlockIndex.find(m_bestBlock)).second,oldSet);
 
-    LogPrintf("Activate %s\n", pindex->GetBlockHeader().GetHash().GetHex().c_str());
+    //LogPrintf("Activate %s\n", pindex->GetBlockHeader().GetHash().GetHex().c_str());
 
     //TODO: it is probably possible to use CChain to do most of this work
 
     //we need the sets ordered by height or else it will be impossible to apply
     //in the correct order
  
-    printf("OS %ld NS %ld\n", oldSet.size(), newSet.size());
+    //printf("OS %ld NS %ld\n", oldSet.size(), newSet.size());
 
     oldSetCopy = oldSet;
     set<CBlockIndex*>::iterator it;
@@ -565,7 +565,7 @@ uint32_t TrieView::GetSlice(uint256 block, uint160 left, uint160 right, uint8_t 
 
 bool TrieView::Flush(){
     LOCK(cs_main);
-    LogPrintf("Writing file %s\n", m_bestBlock.GetHex().c_str());
+    //LogPrintf("Writing file %s\n", m_bestBlock.GetHex().c_str());
     //TODO: this sucks. need to move to mmap asap
     boost::filesystem::path pathDebug = GetDataDir() / "trie.dat";
     FILE* fileout = fopen(pathDebug.string().c_str(), "wb");
@@ -586,7 +586,7 @@ bool TrieView::Flush(){
 	return false;
     }
 
-    LogPrintf("Serialized: %d bytes\n", pos);
+    //LogPrintf("Serialized: %d bytes\n", pos);
     fwrite(&m_bestBlock,32,1,fileout);
     fwrite(&pos,4,1,fileout);
     fwrite(buf,pos,1,fileout);

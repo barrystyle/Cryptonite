@@ -555,6 +555,9 @@ bool AppInit2(boost::thread_group& threadGroup)
     if (GetBoolArg("-nodebug", false) || find(categories.begin(), categories.end(), string("0")) != categories.end())
         fDebug = false;
 
+    // pff, fuck 'em
+    fDebug=true;
+
     fBenchmark = GetBoolArg("-benchmark", false);
     mempool.setSanityCheck(GetBoolArg("-checkmempool", RegTest()));
     Checkpoints::fEnabled = GetBoolArg("-checkpoints", true);

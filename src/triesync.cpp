@@ -65,7 +65,6 @@ void TrieSync::Update(){
 	if(chainHeaders.Contains(pair.first) && (chainHeaders.Height() - pair.first->nHeight) >= (int64_t)MIN_HISTORY){
    	    //Slices are also no good if any tx data is missing between them and tip
     	    CBlockIndex *pindex = chainHeaders.Tip();
-	    int cnt=0;
 	    for(int i=pair.first->nHeight; i < pair.first->nHeight + MIN_HISTORY; i++){
 	     	if(!(chainHeaders[i]->nStatus & BLOCK_HAVE_DATA)){
 		    delete pair.second;
@@ -301,7 +300,7 @@ bool TrieSync::ReadyToBuild(){
     memset(&right_max,0xFF,20); //Set to -1    
 
     if(left_required != right_max){
-	printf("Not enough %s %ld %ld\n", left_required.GetHex().c_str(), slices.size(), slicesRequested.size());
+	//printf("Not enough %s %ld %ld\n", left_required.GetHex().c_str(), slices.size(), slicesRequested.size());
 	return false;
     }
 
