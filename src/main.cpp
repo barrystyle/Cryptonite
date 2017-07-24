@@ -3279,10 +3279,11 @@ void static ProcessGetData(CNode* pfrom)
             // Track requests for our stuff.
             g_signals.Inventory(inv.hash);
 
-            if (pfrom->nSendSize > (SendBufferSize() * 2)) {
-                Misbehaving(pfrom->GetId(), 50);
-                return error("send buffer size() = %u", pfrom->nSendSize);
-            }
+            // baz
+            //if (pfrom->nSendSize > (SendBufferSize() * 2)) {
+            //    Misbehaving(pfrom->GetId(), 50);
+            //    return error("send buffer size() = %u", pfrom->nSendSize);
+            //}
 
             if (inv.type == MSG_BLOCK || inv.type == MSG_FILTERED_BLOCK)
                 break;
@@ -3319,28 +3320,28 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 
     if (strCommand == "version")
     {
-        // Each connection can only send one version message
-        if (pfrom->nVersion != 0)
-        {
-            pfrom->PushMessage("reject", strCommand, REJECT_DUPLICATE, string("Duplicate version message"));
-            Misbehaving(pfrom->GetId(), 1);
-            return false;
-        }
+        // baz; should probably be a bit more grateful if a node IS trying to talk
+        //if (pfrom->nVersion != 0){
+        //    pfrom->PushMessage("reject", strCommand, REJECT_DUPLICATE, string("Duplicate version message"));
+        //    Misbehaving(pfrom->GetId(), 1);
+        //    return false;
+        //}
 
         int64_t nTime;
         CAddress addrMe;
         CAddress addrFrom;
         uint64_t nNonce = 1;
         vRecv >> pfrom->nVersion >> pfrom->nServices >> nTime >> addrMe;
-        if (pfrom->nVersion < MIN_PEER_PROTO_VERSION)
-        {
-            // disconnect from peers older than this proto version
-            LogPrintf("partner %s using obsolete version %i; disconnecting\n", pfrom->addr.ToString(), pfrom->nVersion);
-            pfrom->PushMessage("reject", strCommand, REJECT_OBSOLETE,
-                               strprintf("Version must be %d or greater", MIN_PEER_PROTO_VERSION));
-            pfrom->fDisconnect = true;
-            return false;
-        }
+
+        // baz; again, even if they are old peers, we still have our own standards
+        //if (pfrom->nVersion < MIN_PEER_PROTO_VERSION){
+        //    // disconnect from peers older than this proto version
+        //    LogPrintf("partner %s using obsolete version %i; disconnecting\n", pfrom->addr.ToString(), pfrom->nVersion);
+        //    pfrom->PushMessage("reject", strCommand, REJECT_OBSOLETE,
+        //                       strprintf("Version must be %d or greater", MIN_PEER_PROTO_VERSION));
+        //    pfrom->fDisconnect = true;
+        //    return false;
+        //}
 
         if (!vRecv.empty())
             vRecv >> addrFrom >> nNonce;
@@ -3369,11 +3370,9 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             return true;
         }
 
-        // Be shy and don't send version until we hear
-        if (pfrom->fInbound)
-            pfrom->PushVersion();
-
-        pfrom->fClient = !(pfrom->nServices & NODE_NETWORK);
+        // baz (x3 now); be grateful if a node is even bothering
+        //if (pfrom->fInbound)
+        //    pfrom->PushVersion();
 
         // Change version
         pfrom->PushMessage("verack");
@@ -3383,7 +3382,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         if (!pfrom->fInbound)
         {
             // Advertise our address
-	    //printf("nolisten %d initial %d\n", fNoListen, IsInitialBlockDownload());
+	    printf("nolisten %d initial %d\n", fNoListen, IsInitialBlockDownload());
 
             if (!fNoListen && !IsInitialBlockDownload() && (fTrieOnline || ForceNoTrie()))
             {
@@ -3423,14 +3422,14 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
     }
 
 
-    else if (pfrom->nVersion == 0)
-    {
-        // Must have a version message before anything else
-        Misbehaving(pfrom->GetId(), 1);
-        return false;
-    }
+    // baz: be a bit more tolerant guy
+    //else if (pfrom->nVersion == 0){
+    //    // Must have a version message before anything else
+    //    Misbehaving(pfrom->GetId(), 1);
+    //    return false;
+    //}
 
-
+    if (strCommand == "version" ) ;
     else if (strCommand == "verack")
     {
         pfrom->SetRecvVersion(min(pfrom->nVersion, PROTOCOL_VERSION));
@@ -4335,12 +4334,10 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
             pto->PushMessage("reject", (string)"block", reject.chRejectCode, reject.strRejectReason, reject.hashBlock);
         state.rejects.clear();
 
-        // Start block sync
+        // baz; go for downloading full blocks over headers..
 	//printf("Should send getheaders\n");
         if (pto->fStartSync && !fImporting && !fReindex) {
-            pto->fStartSync = false;
-	    //printf("Sending getheaders %d\n", chainHeaders.Height());
-            pto->PushMessage("getheaders", chainHeaders.GetLocator(), uint256(0));
+            pto->fStartSync = true; 
         }
 
         // Resend wallet transactions that haven't gotten in a block yet
